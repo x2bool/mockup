@@ -1,0 +1,40 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <LangVersion>11</LangVersion>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+        <AssemblyVersion>0.5.0</AssemblyVersion>
+        <Version>0.5.0</Version>
+
+        <Copyright>Sergey Khabibullin</Copyright>
+        <Authors>Sergey Khabibullin</Authors>
+        <RepositoryUrl>https://github.com/x2bool/mockup</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/x2bool/mockup</PackageProjectUrl>
+
+        <NoPackageAnalysis>true</NoPackageAnalysis>
+        <NoDefaultExcludes>true</NoDefaultExcludes>
+        <IncludeSymbols>true</IncludeSymbols>
+        <IncludeSource>true</IncludeSource>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.5.0" />
+        <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeStyle" Version="4.5.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Update="@(PackageReference)" PrivateAssets="All" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+    </ItemGroup>
+
+</Project>
