@@ -25,7 +25,8 @@ Mock it in your test code:
 using Mockup;
 using Xunit;
 
-[assembly: Mock(typeof(IObjectService))] // This will generate mock
+// This will generate mock; use Mock(typeof(IObjectService)) for C# < 11.0
+[assembly: Mock<IObjectService>]
 
 namespace Mockup.Tests;
 
@@ -41,6 +42,7 @@ public class ObjectServiceMockTests
             .Object; // This will produce IObjectService
         
         // Your test code...
+        var result = objectService.ReadWriteProperty; // returns "Value"
     }
 
     [Fact]
@@ -51,6 +53,7 @@ public class ObjectServiceMockTests
             .Object; // This will produce IObjectService
 
         // Your test code...
+        var result = objectService.SingleArgReturnMethod("Value"); // returns "ChangedValue"
     }
 }
 ```
@@ -69,13 +72,13 @@ Install Mockup via NuGet package: `Mockup`, `Mockup.Analyzers`
 
 ### Benchmarks
 
-Return constant string from mocked method:
-
 ```
 BenchmarkDotNet v0.13.12, macOS Ventura 13.6.6 (22G630) [Darwin 22.6.0]
 Intel Core i5-7267U CPU 3.10GHz (Kaby Lake), 1 CPU, 4 logical and 2 physical cores
 .NET SDK 8.0.301 [Host]     : .NET 8.0.6 (8.0.624.26715), X64 RyuJIT AVX2
 ```
+
+Return string provided by a varialbe:
 
 | Method      | Mean        | Error      | StdDev     | Gen0   | Gen1   | Gen2   | Allocated |
 |------------ |------------:|-----------:|-----------:|-------:|-------:|-------:|----------:|
@@ -84,13 +87,7 @@ Intel Core i5-7267U CPU 3.10GHz (Kaby Lake), 1 CPU, 4 logical and 2 physical cor
 | NSubstitute | 5,410.08 ns | 105.646 ns | 121.662 ns | 3.7384 |      - |      - |    7833 B |
 | FakeItEasy  | 5,701.07 ns | 107.159 ns | 114.659 ns | 2.4109 | 0.0153 | 0.0076 |    5057 B |
 
-Return argument string from mocked method:
-
-```
-BenchmarkDotNet v0.13.12, macOS Ventura 13.6.6 (22G630) [Darwin 22.6.0]
-Intel Core i5-7267U CPU 3.10GHz (Kaby Lake), 1 CPU, 4 logical and 2 physical cores
-.NET SDK 8.0.301 [Host]     : .NET 8.0.6 (8.0.624.26715), X64 RyuJIT AVX2
-```
+Return string passed as an argument:
 
 | Method      | Mean         | Error        | StdDev     | Gen0   | Gen1   | Gen2   | Allocated |
 |------------ |-------------:|-------------:|-----------:|-------:|-------:|-------:|----------:|
@@ -98,7 +95,6 @@ Intel Core i5-7267U CPU 3.10GHz (Kaby Lake), 1 CPU, 4 logical and 2 physical cor
 | Moq         | 76,471.38 ns | 1,119.135 ns | 934.529 ns | 4.1504 | 1.2207 | 0.4883 |    9118 B |
 | NSubstitute |  6,309.30 ns |   115.183 ns | 107.743 ns | 3.7537 |      - |      - |    7905 B |
 | FakeItEasy  |  6,377.44 ns |   121.293 ns | 129.783 ns | 2.7771 | 0.0305 | 0.0305 |    5861 B |
-
 
 ### TODO
 
