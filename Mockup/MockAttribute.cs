@@ -11,11 +11,10 @@ public class MockAttribute : Attribute
     }
 }
 
-// public class MockAttribute<T> : MockAttribute
-// {
-//     public MockAttribute()
-//         : base(typeof(T))
-//     {
-//         
-//     }
-// }
+public class MockAttribute<T> : MockAttribute
+{
+    public MockAttribute()
+        : base(typeof(T))
+    {
+    }
+}

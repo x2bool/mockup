@@ -15,8 +15,10 @@ public class MockSourceGenerator : ISourceGenerator
     {
         if (context.SyntaxReceiver is not MockAttributeSyntaxReceiver receiver) return;
 
-        var counterAttribute = context.Compilation.GetTypeByMetadataName(
+        var mockAttribute = context.Compilation.GetTypeByMetadataName(
             "Mockup.MockAttribute");
+        var genericMockAttribute = context.Compilation.GetTypeByMetadataName(
+            "Mockup.MockAttribute`1");
 
         var mockTargets = new List<MockTarget>();
         
@@ -35,19 +37,34 @@ public class MockSourceGenerator : ISourceGenerator
                 {
                     continue;
                 }
-                
-                if (!Utils.IsEqualSymbol(containerSymbol.OriginalDefinition, counterAttribute))
-                {
-                    continue;
-                }
 
-                foreach (var argument in attribute.ArgumentList.Arguments)
+                var definition = containerSymbol.OriginalDefinition.ToDisplayString();
+                if (definition == mockAttribute?.ToDisplayString())
                 {
-                    if (argument.Expression is TypeOfExpressionSyntax typeExpressionSyntax)
+                    foreach (var argument in attribute.ArgumentList.Arguments)
                     {
-                        var typeSyntax = typeExpressionSyntax.Type;
-                        var typeSemantics = context.Compilation.GetSemanticModel(typeSyntax.SyntaxTree);
+                        if (argument.Expression is TypeOfExpressionSyntax typeExpressionSyntax)
+                        {
+                            var typeSyntax = typeExpressionSyntax.Type;
+                            var typeSemantics = context.Compilation.GetSemanticModel(typeSyntax.SyntaxTree);
 
+                            if (typeSemantics.GetSymbolInfo(typeSyntax).Symbol is not ITypeSymbol typeSymbol)
+                            {
+                                continue;
+                            }
+                        
+                            var mockTarget = new MockTarget(typeSymbol);
+                            mockTargets.Add(mockTarget);
+                        }
+                    }
+                }
+                else if (definition == genericMockAttribute?.ToDisplayString()
+                         && attribute.Name is GenericNameSyntax genericNameSyntax)
+                {
+                    foreach (var typeSyntax in genericNameSyntax.TypeArgumentList.Arguments)
+                    {
+                        var typeSemantics = context.Compilation.GetSemanticModel(typeSyntax.SyntaxTree);
+                        
                         if (typeSemantics.GetSymbolInfo(typeSyntax).Symbol is not ITypeSymbol typeSymbol)
                         {
                             continue;

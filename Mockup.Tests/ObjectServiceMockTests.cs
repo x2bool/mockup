@@ -13,11 +13,11 @@ public class ObjectServiceMockTests
     {
         object value = "Value";
 
-        var stringService = new ObjectServiceMock()
+        var objectService = new ObjectServiceMock()
             .ReadProperty(() => value)
             .Object;
         
-        Assert.Equal(value, stringService.ReadProperty);
+        Assert.Equal(value, objectService.ReadProperty);
     }
 
     [Fact]
@@ -25,13 +25,13 @@ public class ObjectServiceMockTests
     {
         object value = "Value";
 
-        var stringService = new ObjectServiceMock()
+        var objectService = new ObjectServiceMock()
             .WriteProperty(v => value = v)
             .Object;
         
         var changedValue = "ChangedValue";
         
-        stringService.WriteProperty = changedValue;
+        objectService.WriteProperty = changedValue;
         Assert.Equal(changedValue, value);
     }
     
@@ -40,11 +40,11 @@ public class ObjectServiceMockTests
     {
         object value = "Value";
         
-        var stringService = new ObjectServiceMock()
+        var objectService = new ObjectServiceMock()
             .ReadWriteProperty(() => value)
             .Object;
         
-        Assert.Equal(value, stringService.ReadWriteProperty);
+        Assert.Equal(value, objectService.ReadWriteProperty);
     }
     
     [Fact]
@@ -52,13 +52,13 @@ public class ObjectServiceMockTests
     {
         object value = "Value";
         
-        var stringService = new ObjectServiceMock()
+        var objectService = new ObjectServiceMock()
             .ReadWriteProperty(v => value = v)
             .Object;
         
         var changedValue = "ChangedValue";
         
-        stringService.ReadWriteProperty = changedValue;
+        objectService.ReadWriteProperty = changedValue;
         Assert.Equal(changedValue, value);
     }
     
@@ -67,19 +67,19 @@ public class ObjectServiceMockTests
     {
         object value = "Value";
         
-        var stringService = new ObjectServiceMock()
+        var objectService = new ObjectServiceMock()
             .ReadWriteProperty(
                 () => value,
                 v => value = v)
             .Object;
         
-        Assert.Equal(value, stringService.ReadWriteProperty);
+        Assert.Equal(value, objectService.ReadWriteProperty);
         
         var changedValue = "ChangedValue";
         
-        stringService.ReadWriteProperty = changedValue;
+        objectService.ReadWriteProperty = changedValue;
         Assert.Equal(changedValue, value);
-        Assert.Equal(changedValue, stringService.ReadWriteProperty);
+        Assert.Equal(changedValue, objectService.ReadWriteProperty);
     }
 
     [Fact]
@@ -115,33 +115,33 @@ public class ObjectServiceMockTests
     {
         object value = "Value";
 
-        var stringService = new ObjectServiceMock()
+        var objectService = new ObjectServiceMock()
             .ReturnMethod(() => value)
             .Object;
 
-        var result = stringService.ReturnMethod();
+        var result = objectService.ReturnMethod();
         Assert.Equal(value, result);
     }
 
     [Fact]
     public void SetupForSingleArgReturnMethodDelegatesToCallback()
     {
-        var stringService = new ObjectServiceMock()
+        var objectService = new ObjectServiceMock()
             .SingleArgReturnMethod(v => "Changed" + v)
             .Object;
 
-        var result = stringService.SingleArgReturnMethod("Value");
+        var result = objectService.SingleArgReturnMethod("Value");
         Assert.Equal("ChangedValue", result);
     }
 
     [Fact]
     public void SetupForMultipleArgsReturnMethodDelegatesToCallback()
     {
-        var stringService = new ObjectServiceMock()
+        var objectService = new ObjectServiceMock()
             .MultipleArgsReturnMethod((a, b) => (string)a + (string)b)
             .Object;
         
-        var result = stringService.MultipleArgsReturnMethod("Changed", "Value");
+        var result = objectService.MultipleArgsReturnMethod("Changed", "Value");
         Assert.Equal("ChangedValue", result);
     }
 }
