@@ -17,7 +17,7 @@ public class PrimitiveServiceMockTests
             .SByteProperty(
                 () => value,
                 v => value = v)
-            .Object;
+            .Build();
         
         Assert.Equal(0, primitiveService.SByteProperty);
 
@@ -34,7 +34,7 @@ public class PrimitiveServiceMockTests
             .ByteProperty(
                 () => value,
                 v => value = v)
-            .Object;
+            .Build();
         
         Assert.Equal(0, primitiveService.ByteProperty);
 
@@ -51,7 +51,7 @@ public class PrimitiveServiceMockTests
             .ShortProperty(
                 () => value,
                 v => value = v)
-            .Object;
+            .Build();
         
         Assert.Equal(0, primitiveService.ShortProperty);
 
@@ -68,7 +68,7 @@ public class PrimitiveServiceMockTests
             .UShortProperty(
                 () => value,
                 v => value = v)
-            .Object;
+            .Build();
         
         Assert.Equal(0, primitiveService.UShortProperty);
 
@@ -85,7 +85,7 @@ public class PrimitiveServiceMockTests
             .IntProperty(
                 () => value,
                 v => value = v)
-            .Object;
+            .Build();
         
         Assert.Equal(0, primitiveService.IntProperty);
 
@@ -102,7 +102,7 @@ public class PrimitiveServiceMockTests
             .UIntProperty(
                 () => value,
                 v => value = v)
-            .Object;
+            .Build();
         
         Assert.Equal(0u, primitiveService.UIntProperty);
         
@@ -119,7 +119,7 @@ public class PrimitiveServiceMockTests
             .LongProperty(
                 () => value,
                 v => value = v)
-            .Object;
+            .Build();
         
         Assert.Equal(0, primitiveService.LongProperty);
 
@@ -136,7 +136,7 @@ public class PrimitiveServiceMockTests
             .ULongProperty(
                 () => value,
                 v => value = v)
-            .Object;
+            .Build();
         
         Assert.Equal(0ul, primitiveService.ULongProperty);
     
@@ -153,7 +153,7 @@ public class PrimitiveServiceMockTests
             .CharProperty(
                 () => value,
                 v => value = v)
-            .Object;
+            .Build();
         
         Assert.Equal('a', primitiveService.CharProperty);
 
@@ -168,7 +168,7 @@ public class PrimitiveServiceMockTests
 
         var primitiveService = new PrimitiveServiceMock()
             .VoidMethod(() => called = true)
-            .Object;
+            .Build();
         
         primitiveService.VoidMethod();
         
@@ -182,7 +182,7 @@ public class PrimitiveServiceMockTests
 
         var primitiveService = new PrimitiveServiceMock()
             .SByteSingleArgMethod(v => value = v)
-            .Object;
+            .Build();
         
         primitiveService.SByteSingleArgMethod(1);
         
@@ -196,7 +196,7 @@ public class PrimitiveServiceMockTests
 
         var primitiveService = new PrimitiveServiceMock()
             .SByteMultipleArgsMethod((a, b) => value = a + b)
-            .Object;
+            .Build();
         
         primitiveService.SByteMultipleArgsMethod(1, 2);
         
@@ -210,7 +210,7 @@ public class PrimitiveServiceMockTests
 
         var primitiveService = new PrimitiveServiceMock()
             .SByteReturnMethod(() => value)
-            .Object;
+            .Build();
 
         var result = primitiveService.SByteReturnMethod();
         
@@ -222,7 +222,7 @@ public class PrimitiveServiceMockTests
     {
         var primitiveService = new PrimitiveServiceMock()
             .SByteSingleArgReturnMethod(a => (sbyte)(a + a))
-            .Object;
+            .Build();
 
         var result = primitiveService.SByteSingleArgReturnMethod(1);
         
@@ -234,7 +234,7 @@ public class PrimitiveServiceMockTests
     {
         var primitiveService = new PrimitiveServiceMock()
             .SByteMultipleArgsReturnMethod((a, b) => (sbyte)(a + b))
-            .Object;
+            .Build();
 
         var result = primitiveService.SByteMultipleArgsReturnMethod(1, 2);
         

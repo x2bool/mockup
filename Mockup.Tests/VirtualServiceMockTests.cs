@@ -16,7 +16,7 @@ public class VirtualServiceMockTests
 
         var virtualObjectService = new VirtualObjectServiceMock()
             .ReadProperty(() => value)
-            .Object;
+            .Build();
         
         Assert.Equal(value, virtualObjectService.ReadProperty);
     }
@@ -25,7 +25,7 @@ public class VirtualServiceMockTests
     public void DefaultImplOfReadPropertyDelegatesGetterToBase()
     {
         var virtualObjectService = new VirtualObjectServiceMock()
-            .Object;
+            .Build();
 
         Assert.Equal("base", virtualObjectService.ReadProperty);
     }
@@ -37,7 +37,7 @@ public class VirtualServiceMockTests
 
         var virtualObjectService = new VirtualObjectServiceMock()
             .WriteProperty(v => value = v)
-            .Object;
+            .Build();
         
         var changedValue = "ChangedValue";
         
@@ -49,7 +49,7 @@ public class VirtualServiceMockTests
     public void DefaultImplOfWritePropertyDelegatesSetterToBase()
     {
         var virtualObjectService = new VirtualObjectServiceMock()
-            .Object;
+            .Build();
 
         virtualObjectService.WriteProperty = new object(); // any value
         Assert.Equal("base", virtualObjectService.WritePropertyValue);
@@ -62,7 +62,7 @@ public class VirtualServiceMockTests
         
         var virtualObjectService = new VirtualObjectServiceMock()
             .ReadWriteProperty(() => value)
-            .Object;
+            .Build();
         
         Assert.Equal(value, virtualObjectService.ReadWriteProperty);
     }
@@ -73,7 +73,7 @@ public class VirtualServiceMockTests
         object value = "Value";
         
         var virtualObjectService = new VirtualObjectServiceMock()
-            .Object;
+            .Build();
         
         Assert.Equal("base", virtualObjectService.ReadWriteProperty);
     }
@@ -85,7 +85,7 @@ public class VirtualServiceMockTests
         
         var virtualObjectService = new VirtualObjectServiceMock()
             .ReadWriteProperty(v => value = v)
-            .Object;
+            .Build();
         
         var changedValue = "ChangedValue";
         
@@ -97,7 +97,7 @@ public class VirtualServiceMockTests
     public void DefaultImplOfReadWritePropertyDelegatesSetterToBase()
     {
         var virtualObjectService = new VirtualObjectServiceMock()
-            .Object;
+            .Build();
         
         virtualObjectService.ReadWriteProperty = new object(); // any value
         Assert.Equal("base", virtualObjectService.ReadWritePropertyValue);
@@ -112,7 +112,7 @@ public class VirtualServiceMockTests
             .ReadWriteProperty(
                 () => value,
                 v => value = v)
-            .Object;
+            .Build();
         
         Assert.Equal(value, virtualObjectService.ReadWriteProperty);
         
@@ -130,7 +130,7 @@ public class VirtualServiceMockTests
 
         var virtualObjectService = new VirtualObjectServiceMock()
             .SingleArgMethod(v => value = v)
-            .Object;
+            .Build();
         
         var changedValue = "ChangedValue";
         
@@ -142,7 +142,7 @@ public class VirtualServiceMockTests
     public void DefaultImplOfSingleArgMethodDelegatesToBase()
     {
         var virtualObjectService = new VirtualObjectServiceMock()
-            .Object;
+            .Build();
         
         virtualObjectService.SingleArgMethod(new object()); // any value
         Assert.Equal("base", virtualObjectService.SingleArgMethodValue);
@@ -155,7 +155,7 @@ public class VirtualServiceMockTests
 
         var virtualObjectService = new VirtualObjectServiceMock()
             .MultipleArgsMethod((a, b) => value = (string)a + (string)b)
-            .Object;
+            .Build();
 
         virtualObjectService.MultipleArgsMethod("Changed", "Value");
         Assert.Equal("ChangedValue", value);
@@ -165,7 +165,7 @@ public class VirtualServiceMockTests
     public void DefaultImplOfMultipleArgsMethodDelegatesToBase()
     {
         var virtualObjectService = new VirtualObjectServiceMock()
-            .Object;
+            .Build();
 
         virtualObjectService.MultipleArgsMethod(new object(), new object()); // any values
         Assert.Equal("base", virtualObjectService.MultipleArgsMethodValue);
@@ -178,7 +178,7 @@ public class VirtualServiceMockTests
 
         var virtualObjectService = new VirtualObjectServiceMock()
             .ReturnMethod(() => value)
-            .Object;
+            .Build();
 
         var result = virtualObjectService.ReturnMethod();
         Assert.Equal(value, result);
@@ -188,7 +188,7 @@ public class VirtualServiceMockTests
     public void DefaultImplOfReturnMethodDelegatesToBase()
     {
         var virtualObjectService = new VirtualObjectServiceMock()
-            .Object;
+            .Build();
 
         var result = virtualObjectService.ReturnMethod();
         Assert.Equal("base", result);
@@ -199,7 +199,7 @@ public class VirtualServiceMockTests
     {
         var virtualObjectService = new VirtualObjectServiceMock()
             .SingleArgReturnMethod(v => "Changed" + v)
-            .Object;
+            .Build();
 
         var result = virtualObjectService.SingleArgReturnMethod("Value");
         Assert.Equal("ChangedValue", result);
@@ -209,7 +209,7 @@ public class VirtualServiceMockTests
     public void DefaultImplOfSingleArgReturnMethodDelegatesToBase()
     {
         var virtualObjectService = new VirtualObjectServiceMock()
-            .Object;
+            .Build();
 
         var result = virtualObjectService.SingleArgReturnMethod(new object()); // any value
         Assert.Equal("base", result);
@@ -220,7 +220,7 @@ public class VirtualServiceMockTests
     {
         var virtualObjectService = new VirtualObjectServiceMock()
             .MultipleArgsReturnMethod((a, b) => (string)a + (string)b)
-            .Object;
+            .Build();
         
         var result = virtualObjectService.MultipleArgsReturnMethod("Changed", "Value");
         Assert.Equal("ChangedValue", result);
@@ -230,7 +230,7 @@ public class VirtualServiceMockTests
     public void DefaultImplOfMultipleArgsReturnMethodDelegatesToBase()
     {
         var virtualObjectService = new VirtualObjectServiceMock()
-            .Object;
+            .Build();
         
         var result = virtualObjectService.MultipleArgsReturnMethod(new object(), new object()); // any value
         Assert.Equal("base", result);

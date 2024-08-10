@@ -15,7 +15,7 @@ public class StringServiceMockTests
 
         var stringService = new StringServiceMock()
             .ReadProperty(() => value)
-            .Object;
+            .Build();
         
         Assert.Equal(value, stringService.ReadProperty);
     }
@@ -27,7 +27,7 @@ public class StringServiceMockTests
 
         var stringService = new StringServiceMock()
             .WriteProperty(v => value = v)
-            .Object;
+            .Build();
         
         var changedValue = "ChangedValue";
         
@@ -42,7 +42,7 @@ public class StringServiceMockTests
         
         var stringService = new StringServiceMock()
             .ReadWriteProperty(() => value)
-            .Object;
+            .Build();
         
         Assert.Equal(value, stringService.ReadWriteProperty);
     }
@@ -54,7 +54,7 @@ public class StringServiceMockTests
         
         var stringService = new StringServiceMock()
             .ReadWriteProperty(v => value = v)
-            .Object;
+            .Build();
         
         var changedValue = "ChangedValue";
         
@@ -71,7 +71,7 @@ public class StringServiceMockTests
             .ReadWriteProperty(
                 () => value,
                 v => value = v)
-            .Object;
+            .Build();
         
         Assert.Equal(value, stringService.ReadWriteProperty);
         
@@ -89,7 +89,7 @@ public class StringServiceMockTests
 
         var stringSevice = new StringServiceMock()
             .SingleArgMethod(v => value = v)
-            .Object;
+            .Build();
         
         var changedValue = "ChangedValue";
         
@@ -104,7 +104,7 @@ public class StringServiceMockTests
 
         var stringSevice = new StringServiceMock()
             .MultipleArgsMethod((a, b) => value = a + b)
-            .Object;
+            .Build();
 
         stringSevice.MultipleArgsMethod("Changed", "Value");
         Assert.Equal("ChangedValue", value);
@@ -117,7 +117,7 @@ public class StringServiceMockTests
 
         var stringService = new StringServiceMock()
             .ReturnMethod(() => value)
-            .Object;
+            .Build();
 
         var result = stringService.ReturnMethod();
         Assert.Equal(value, result);
@@ -128,7 +128,7 @@ public class StringServiceMockTests
     {
         var stringService = new StringServiceMock()
             .SingleArgReturnMethod(v => "Changed" + v)
-            .Object;
+            .Build();
 
         var result = stringService.SingleArgReturnMethod("Value");
         Assert.Equal("ChangedValue", result);
@@ -139,7 +139,7 @@ public class StringServiceMockTests
     {
         var stringService = new StringServiceMock()
             .MultipleArgsReturnMethod((a, b) => a + b)
-            .Object;
+            .Build();
         
         var result = stringService.MultipleArgsReturnMethod("Changed", "Value");
         Assert.Equal("ChangedValue", result);

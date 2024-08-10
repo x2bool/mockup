@@ -17,7 +17,7 @@ public class ArrayServiceMockTests
             .IntArrayProp(
                 () => arr,
                 v => arr = v)
-            .Object;
+            .Build();
         
         Assert.Equal(arr, arrayService.IntArrayProp);
 
@@ -37,7 +37,7 @@ public class ArrayServiceMockTests
             .ObjectArrayProp(
                 () => arr,
                 v => arr = v)
-            .Object;
+            .Build();
         
         Assert.Equal(arr, arrayService.ObjectArrayProp);
 
@@ -57,7 +57,7 @@ public class ArrayServiceMockTests
             .StringArrayProp(
                 () => arr,
                 v => arr = v)
-            .Object;
+            .Build();
         
         Assert.Equal(arr, arrayService.StringArrayProp);
 
@@ -75,7 +75,7 @@ public class ArrayServiceMockTests
 
         var stringService = new ArrayServiceMock()
             .ReturnArrayMethod(() => arr)
-            .Object;
+            .Build();
 
         var result = stringService.ReturnArrayMethod();
         Assert.Equal(arr, result);
@@ -88,7 +88,7 @@ public class ArrayServiceMockTests
 
         var stringSevice = new ArrayServiceMock()
             .SingleArgArrayMethod(v => arr = v)
-            .Object;
+            .Build();
 
         var changedArr = new int[2];
 
@@ -105,7 +105,7 @@ public class ArrayServiceMockTests
             .JaggedIntArrayProp(
                 () => arr,
                 v => arr = v)
-            .Object;
+            .Build();
         
         Assert.Equal(arr, arrayService.JaggedIntArrayProp);
 
@@ -125,7 +125,7 @@ public class ArrayServiceMockTests
             .JaggedObjectArrayProp(
                 () => arr,
                 v => arr = v)
-            .Object;
+            .Build();
         
         Assert.Equal(arr, arrayService.JaggedObjectArrayProp);
 
@@ -145,7 +145,7 @@ public class ArrayServiceMockTests
             .JaggedStringArrayProp(
                 () => arr,
                 v => arr = v)
-            .Object;
+            .Build();
         
         Assert.Equal(arr, arrayService.JaggedStringArrayProp);
 
@@ -163,7 +163,7 @@ public class ArrayServiceMockTests
 
         var stringService = new ArrayServiceMock()
             .ReturnJaggedArrayMethod(() => arr)
-            .Object;
+            .Build();
 
         var result = stringService.ReturnJaggedArrayMethod();
         Assert.Equal(arr, result);
@@ -176,7 +176,7 @@ public class ArrayServiceMockTests
 
         var stringSevice = new ArrayServiceMock()
             .SingleArgJaggedArrayMethod(v => arr = v)
-            .Object;
+            .Build();
 
         var changedArr = new int[2][];
 

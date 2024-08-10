@@ -16,7 +16,7 @@ public class AbstractServiceMockTests
 
         var abstractObjectService = new AbstractObjectServiceMock()
             .ReadProperty(() => value)
-            .Object;
+            .Build();
         
         Assert.Equal(value, abstractObjectService.ReadProperty);
     }
@@ -28,7 +28,7 @@ public class AbstractServiceMockTests
 
         var abstractObjectService = new AbstractObjectServiceMock()
             .WriteProperty(v => value = v)
-            .Object;
+            .Build();
         
         var changedValue = "ChangedValue";
         
@@ -43,7 +43,7 @@ public class AbstractServiceMockTests
         
         var abstractObjectService = new AbstractObjectServiceMock()
             .ReadWriteProperty(() => value)
-            .Object;
+            .Build();
         
         Assert.Equal(value, abstractObjectService.ReadWriteProperty);
     }
@@ -55,7 +55,7 @@ public class AbstractServiceMockTests
         
         var abstractObjectService = new AbstractObjectServiceMock()
             .ReadWriteProperty(v => value = v)
-            .Object;
+            .Build();
         
         var changedValue = "ChangedValue";
         
@@ -72,7 +72,7 @@ public class AbstractServiceMockTests
             .ReadWriteProperty(
                 () => value,
                 v => value = v)
-            .Object;
+            .Build();
         
         Assert.Equal(value, abstractObjectService.ReadWriteProperty);
         
@@ -90,7 +90,7 @@ public class AbstractServiceMockTests
 
         var abstractObjectService = new AbstractObjectServiceMock()
             .SingleArgMethod(v => value = v)
-            .Object;
+            .Build();
         
         var changedValue = "ChangedValue";
         
@@ -105,7 +105,7 @@ public class AbstractServiceMockTests
 
         var abstractObjectService = new AbstractObjectServiceMock()
             .MultipleArgsMethod((a, b) => value = (string)a + (string)b)
-            .Object;
+            .Build();
 
         abstractObjectService.MultipleArgsMethod("Changed", "Value");
         Assert.Equal("ChangedValue", value);
@@ -118,7 +118,7 @@ public class AbstractServiceMockTests
 
         var abstractObjectService = new AbstractObjectServiceMock()
             .ReturnMethod(() => value)
-            .Object;
+            .Build();
 
         var result = abstractObjectService.ReturnMethod();
         Assert.Equal(value, result);
@@ -129,7 +129,7 @@ public class AbstractServiceMockTests
     {
         var abstractObjectService = new AbstractObjectServiceMock()
             .SingleArgReturnMethod(v => "Changed" + v)
-            .Object;
+            .Build();
 
         var result = abstractObjectService.SingleArgReturnMethod("Value");
         Assert.Equal("ChangedValue", result);
@@ -140,7 +140,7 @@ public class AbstractServiceMockTests
     {
         var abstractObjectService = new AbstractObjectServiceMock()
             .MultipleArgsReturnMethod((a, b) => (string)a + (string)b)
-            .Object;
+            .Build();
         
         var result = abstractObjectService.MultipleArgsReturnMethod("Changed", "Value");
         Assert.Equal("ChangedValue", result);

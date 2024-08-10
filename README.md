@@ -39,7 +39,7 @@ public class ObjectServiceMockTests
         
         var objectService = new ObjectServiceMock()
             .ReadWriteProperty(() => value, v => value = v)
-            .Object; // This will produce IObjectService
+            .Build(); // This will produce IObjectService
         
         // Your test code...
         var result = objectService.ReadWriteProperty; // returns "Value"
@@ -50,7 +50,7 @@ public class ObjectServiceMockTests
     {
         var objectService = new ObjectServiceMock()
             .SingleArgReturnMethod(v => "Changed" + v)
-            .Object; // This will produce IObjectService
+            .Build(); // This will produce IObjectService
 
         // Your test code...
         var result = objectService.SingleArgReturnMethod("Value"); // returns "ChangedValue"

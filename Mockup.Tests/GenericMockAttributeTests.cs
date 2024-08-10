@@ -12,7 +12,7 @@ public class GenericMockAttributeTests
     public void GenericMockAttributeProducesCorrectType()
     {
         var emptyService = new EmptyServiceMock()
-            .Object;
+            .Build();
         
         Assert.True(typeof(IEmptyService).IsAssignableFrom(emptyService.GetType()));
     }

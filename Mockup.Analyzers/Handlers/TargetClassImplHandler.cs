@@ -100,7 +100,7 @@ public class TargetClassImplHandler : ITypeSymbolVisitor<MemberDeclarationSyntax
 
     public MemberDeclarationSyntax[]? End()
     {
-        var accessor = Accessor();
+        var builderMethod = BuilderMethod();
         var cls = ClassDeclaration("@class")
             .WithModifiers
             (
@@ -129,7 +129,7 @@ public class TargetClassImplHandler : ITypeSymbolVisitor<MemberDeclarationSyntax
 
         return new MemberDeclarationSyntax[]
         {
-            accessor,
+            builderMethod,
             cls
         };
     }
@@ -254,13 +254,13 @@ public class TargetClassImplHandler : ITypeSymbolVisitor<MemberDeclarationSyntax
             )
         );
     }
-    
-    private PropertyDeclarationSyntax Accessor()
+
+    private MethodDeclarationSyntax BuilderMethod()
     {
-        return PropertyDeclaration
+        return MethodDeclaration
         (
             IdentifierName(_typeSymbol.Name),
-            Identifier("Object")
+            Identifier("Build") // TODO: make configurable
         )
         .WithModifiers
         (
@@ -269,40 +269,27 @@ public class TargetClassImplHandler : ITypeSymbolVisitor<MemberDeclarationSyntax
                 Token(SyntaxKind.PublicKeyword)
             )
         )
-        .WithAccessorList
+        .WithBody
         (
-            AccessorList
+            Block
             (
-                SingletonList
+                SingletonList<StatementSyntax>
                 (
-                    AccessorDeclaration
+                    ReturnStatement
                     (
-                        SyntaxKind.GetAccessorDeclaration
-                    )
-                    .WithBody
-                    (
-                        Block
+                        ObjectCreationExpression
                         (
-                            SingletonList<StatementSyntax>
+                            IdentifierName("@class")
+                        )
+                        .WithArgumentList
+                        (
+                            ArgumentList
                             (
-                                ReturnStatement
+                                SingletonSeparatedList<ArgumentSyntax>
                                 (
-                                    ObjectCreationExpression
+                                    Argument
                                     (
-                                        IdentifierName("@class")
-                                    )
-                                    .WithArgumentList
-                                    (
-                                        ArgumentList
-                                        (
-                                            SingletonSeparatedList<ArgumentSyntax>
-                                            (
-                                                Argument
-                                                (
-                                                    ThisExpression()
-                                                )
-                                            )
-                                        )
+                                        ThisExpression()
                                     )
                                 )
                             )

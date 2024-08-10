@@ -15,7 +15,7 @@ public class ReturnArgStringBenchmark
         
         var stringService = new StringServiceMock()
             .GetArgString(v => v)
-            .Object;
+            .Build();
 
         return stringService.GetArgString(value);
     }

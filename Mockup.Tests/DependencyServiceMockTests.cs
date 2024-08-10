@@ -19,7 +19,7 @@ public class DependencyServiceMockTests
             .ClassProp(
                 () => value,
                 v => value = v)
-            .Object;
+            .Build();
         
         Assert.Equal(value, dependencyService.ClassProp);
 
@@ -36,7 +36,7 @@ public class DependencyServiceMockTests
 
         var dependencyService = new DependencyServiceMock()
             .ReturnClassMethod(() => value)
-            .Object;
+            .Build();
         
         Assert.Equal(value, dependencyService.ReturnClassMethod());
     }
@@ -48,7 +48,7 @@ public class DependencyServiceMockTests
 
         var dependencyService = new DependencyServiceMock()
             .SingleArgClassMethod(v => value = v)
-            .Object;
+            .Build();
 
         var changedValue = new ClassDependency();
         dependencyService.SingleArgClassMethod(changedValue);
@@ -65,7 +65,7 @@ public class DependencyServiceMockTests
             .InterfaceProp(
                 () => value,
                 v => value = v)
-            .Object;
+            .Build();
         
         Assert.Equal(value, dependencyService.InterfaceProp);
 
@@ -82,7 +82,7 @@ public class DependencyServiceMockTests
 
         var dependencyService = new DependencyServiceMock()
             .ReturnInterfaceMethod(() => value)
-            .Object;
+            .Build();
         
         Assert.Equal(value, dependencyService.ReturnInterfaceMethod());
     }
@@ -94,7 +94,7 @@ public class DependencyServiceMockTests
 
         var dependencyService = new DependencyServiceMock()
             .SingleArgInterfaceMethod(v => value = v)
-            .Object;
+            .Build();
 
         var changedValue = new ClassDependency();
         dependencyService.SingleArgInterfaceMethod(changedValue);
@@ -111,7 +111,7 @@ public class DependencyServiceMockTests
             .StructProp(
                 () => value,
                 v => value = v)
-            .Object;
+            .Build();
         
         Assert.Equal(value, dependencyService.StructProp);
 
@@ -128,7 +128,7 @@ public class DependencyServiceMockTests
 
         var dependencyService = new DependencyServiceMock()
             .ReturnStructMethod(() => value)
-            .Object;
+            .Build();
         
         Assert.Equal(value, dependencyService.ReturnStructMethod());
     }
@@ -140,7 +140,7 @@ public class DependencyServiceMockTests
 
         var dependencyService = new DependencyServiceMock()
             .SingleArgStructMethod(v => value = v)
-            .Object;
+            .Build();
 
         var changedValue = new StructDependency(2);
         dependencyService.SingleArgStructMethod(changedValue);
@@ -157,7 +157,7 @@ public class DependencyServiceMockTests
             .EnumProp(
                 () => value,
                 v => value = v)
-            .Object;
+            .Build();
         
         Assert.Equal(value, dependencyService.EnumProp);
 
@@ -174,7 +174,7 @@ public class DependencyServiceMockTests
 
         var dependencyService = new DependencyServiceMock()
             .ReturnEnumMethod(() => value)
-            .Object;
+            .Build();
         
         Assert.Equal(value, dependencyService.ReturnEnumMethod());
     }
@@ -186,7 +186,7 @@ public class DependencyServiceMockTests
 
         var dependencyService = new DependencyServiceMock()
             .SingleArgEnumMethod(v => value = v)
-            .Object;
+            .Build();
 
         var changedValue = EnumDependency.Value2;
         dependencyService.SingleArgEnumMethod(changedValue);
@@ -203,7 +203,7 @@ public class DependencyServiceMockTests
             .ExternalProp(
                 () => value,
                 v => value = v)
-            .Object;
+            .Build();
         
         Assert.Equal(value, dependencyService.ExternalProp);
 
@@ -220,7 +220,7 @@ public class DependencyServiceMockTests
 
         var dependencyService = new DependencyServiceMock()
             .ReturnExternalMethod(() => value)
-            .Object;
+            .Build();
         
         Assert.Equal(value, dependencyService.ReturnExternalMethod());
     }
@@ -232,7 +232,7 @@ public class DependencyServiceMockTests
 
         var dependencyService = new DependencyServiceMock()
             .SingleArgExternalMethod(v => value = v)
-            .Object;
+            .Build();
 
         var changedValue = new StringBuilder();
         dependencyService.SingleArgExternalMethod(changedValue);
