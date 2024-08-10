@@ -4,6 +4,7 @@ using Mockup.Tests.Targets;
 using Xunit;
 
 [assembly: Mock(typeof(VirtualObjectService))]
+[assembly: Mock(typeof(VirtualObjectServiceWithConstructor))]
 
 namespace Mockup.Tests;
 
@@ -234,5 +235,33 @@ public class VirtualServiceMockTests
         
         var result = virtualObjectService.MultipleArgsReturnMethod(new object(), new object()); // any value
         Assert.Equal("base", result);
+    }
+
+    [Fact]
+    public void BuildForConstructorWithZeroParamsCallsBaseConstructor()
+    {
+        var virtualObjectService = new VirtualObjectServiceWithConstructorMock()
+            .Build();
+        
+        Assert.Equal("base", virtualObjectService.EmptyValue);
+    }
+
+    [Fact]
+    public void BuildForConstructorWithOneParamCallsBaseConstructor()
+    {
+        var virtualObjectService = new VirtualObjectServiceWithConstructorMock()
+            .Build("Value");
+        
+        Assert.Equal("Value", virtualObjectService.ArgValue);
+    }
+
+    [Fact]
+    public void BuildForConstructorWithTwoParamsCallsBaseConstructor()
+    {
+        var virtualObjectService = new VirtualObjectServiceWithConstructorMock()
+            .Build("Value1", "Value2");
+        
+        Assert.Equal("Value1", virtualObjectService.Arg1Value);
+        Assert.Equal("Value2", virtualObjectService.Arg2Value);
     }
 }

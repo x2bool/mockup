@@ -38,7 +38,6 @@ public class TargetClassImplHandler : ITypeSymbolVisitor<MemberDeclarationSyntax
     {
         _members = new List<MemberDeclarationSyntax>(count);
         _members.Add(BackingField());
-        _members.Add(Constructor());
     }
 
     public void Member(ISymbol symbol)
@@ -46,26 +45,32 @@ public class TargetClassImplHandler : ITypeSymbolVisitor<MemberDeclarationSyntax
         switch (symbol)
         {
             case IMethodSymbol methodSymbol:
-                if (IsOverrideable(methodSymbol))
+                if (IsConstructor(methodSymbol))
                 {
-                    Member(methodSymbol);
+                    MemberConstructor(methodSymbol);
+                }
+                else if (IsOverrideable(methodSymbol))
+                {
+                    MemberMethod(methodSymbol);
                 }
                 break;
             
             case IPropertySymbol propertySymbol:
                 if (propertySymbol.IsAbstract || propertySymbol.IsVirtual)
                 {
-                    Member(propertySymbol);
+                    MemberProp(propertySymbol);
                 }
                 break;
         }
     }
 
+    private bool IsConstructor(IMethodSymbol methodSymbol)
+    {
+        return methodSymbol.MethodKind == MethodKind.Constructor;
+    }
+    
     private bool IsOverrideable(IMethodSymbol methodSymbol)
     {
-        //if (methodSymbol.Name == ".ctor") return false; // TODO: ???
-        //if (methodSymbol.Name == _typeSymbol.Name) return false;
-        
         if (methodSymbol.MethodKind == MethodKind.Ordinary
             || methodSymbol.MethodKind == MethodKind.DeclareMethod)
         {
@@ -76,7 +81,14 @@ public class TargetClassImplHandler : ITypeSymbolVisitor<MemberDeclarationSyntax
         return false;
     }
 
-    private void Member(IMethodSymbol methodSymbol)
+    private void MemberConstructor(IMethodSymbol methodSymbol)
+    {
+        var members = methodSymbol.Visit(new ConstructorImplHandler(
+            new ConstructorImplStrategy()));
+        _members.AddRange(members);
+    }
+    
+    private void MemberMethod(IMethodSymbol methodSymbol)
     {
         if (methodSymbol.MethodKind == MethodKind.PropertyGet)
             return;
@@ -88,7 +100,7 @@ public class TargetClassImplHandler : ITypeSymbolVisitor<MemberDeclarationSyntax
         _members.AddRange(members);
     }
 
-    private void Member(IPropertySymbol propertySymbol)
+    private void MemberProp(IPropertySymbol propertySymbol)
     {
         var members = propertySymbol.Visit(new PropertyImplHandler());
         _members.AddRange(members);
@@ -100,7 +112,6 @@ public class TargetClassImplHandler : ITypeSymbolVisitor<MemberDeclarationSyntax
 
     public MemberDeclarationSyntax[]? End()
     {
-        var builderMethod = BuilderMethod();
         var cls = ClassDeclaration("@class")
             .WithModifiers
             (
@@ -129,7 +140,6 @@ public class TargetClassImplHandler : ITypeSymbolVisitor<MemberDeclarationSyntax
 
         return new MemberDeclarationSyntax[]
         {
-            builderMethod,
             cls
         };
     }
@@ -169,133 +179,6 @@ public class TargetClassImplHandler : ITypeSymbolVisitor<MemberDeclarationSyntax
                     Token(SyntaxKind.PrivateKeyword),
                     Token(SyntaxKind.ReadOnlyKeyword)
                 }
-            )
-        );
-    }
-
-    private ConstructorDeclarationSyntax Constructor()
-    {
-        return ConstructorDeclaration
-        (
-            Identifier("@class")
-        )
-        .WithModifiers
-        (
-            TokenList
-            (
-                Token(SyntaxKind.PublicKeyword)
-            )
-        )
-        .WithParameterList
-        (
-            ParameterList
-            (
-                SingletonSeparatedList<ParameterSyntax>
-                (
-                    Parameter
-                        (
-                            Identifier
-                            (
-                                TriviaList(),
-                                SyntaxKind.VarKeyword,
-                                "@var",
-                                "var",
-                                TriviaList()
-                            )
-                        )
-                        .WithType
-                        (
-                            IdentifierName(_strategy.GetTypeName(_typeSymbol))
-                        )
-                )
-            )
-        )
-        .WithBody
-        (
-            Block
-            (
-                SingletonList<StatementSyntax>
-                (
-                    ExpressionStatement
-                    (
-                        AssignmentExpression
-                        (
-                            SyntaxKind.SimpleAssignmentExpression,
-                            MemberAccessExpression
-                            (
-                                SyntaxKind.SimpleMemberAccessExpression,
-                                ThisExpression(),
-                                IdentifierName
-                                (
-                                    Identifier
-                                    (
-                                        TriviaList(),
-                                        SyntaxKind.VarKeyword,
-                                        "@var",
-                                        "var",
-                                        TriviaList()
-                                    )
-                                )
-                            ),
-                            IdentifierName
-                            (
-                                Identifier
-                                (
-                                    TriviaList(),
-                                    SyntaxKind.VarKeyword,
-                                    "@var",
-                                    "var",
-                                    TriviaList()
-                                )
-                            )
-                        )
-                    )
-                )
-            )
-        );
-    }
-
-    private MethodDeclarationSyntax BuilderMethod()
-    {
-        return MethodDeclaration
-        (
-            IdentifierName(_typeSymbol.Name),
-            Identifier("Build") // TODO: make configurable
-        )
-        .WithModifiers
-        (
-            TokenList
-            (
-                Token(SyntaxKind.PublicKeyword)
-            )
-        )
-        .WithBody
-        (
-            Block
-            (
-                SingletonList<StatementSyntax>
-                (
-                    ReturnStatement
-                    (
-                        ObjectCreationExpression
-                        (
-                            IdentifierName("@class")
-                        )
-                        .WithArgumentList
-                        (
-                            ArgumentList
-                            (
-                                SingletonSeparatedList<ArgumentSyntax>
-                                (
-                                    Argument
-                                    (
-                                        ThisExpression()
-                                    )
-                                )
-                            )
-                        )
-                    )
-                )
             )
         );
     }

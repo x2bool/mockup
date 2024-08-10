@@ -44,26 +44,32 @@ public class TargetClassBuilderHandler : ITypeSymbolVisitor<CompilationUnitSynta
         switch (symbol)
         {
             case IMethodSymbol methodSymbol:
-                if (IsOverrideable(methodSymbol))
+                if (IsConstructor(methodSymbol))
                 {
-                    Member(methodSymbol);
+                    MemberConstructor(methodSymbol);
+                }
+                else if (IsOverrideable(methodSymbol))
+                {
+                    MemberMethod(methodSymbol);
                 }
                 break;
             
             case IPropertySymbol propertySymbol:
                 if (propertySymbol.IsAbstract || propertySymbol.IsVirtual)
                 {
-                    Member(propertySymbol);
+                    MemberProp(propertySymbol);
                 }
                 break;
         }
     }
 
+    private bool IsConstructor(IMethodSymbol methodSymbol)
+    {
+        return methodSymbol.MethodKind == MethodKind.Constructor;
+    }
+
     private bool IsOverrideable(IMethodSymbol methodSymbol)
     {
-        // if (methodSymbol.Name == ".ctor") return false; // TODO: ???
-        // if (methodSymbol.Name == _typeSymbol.Name) return false;
-        
         if (methodSymbol.MethodKind == MethodKind.Ordinary
             || methodSymbol.MethodKind == MethodKind.DeclareMethod)
         {
@@ -74,7 +80,14 @@ public class TargetClassBuilderHandler : ITypeSymbolVisitor<CompilationUnitSynta
         return false;
     }
 
-    private void Member(IMethodSymbol methodSymbol)
+    private void MemberConstructor(IMethodSymbol methodSymbol)
+    {
+        var members = methodSymbol.Visit(new ConstructorBuilderHandler(
+            new ConstructorBuilderStrategy()));
+        _members.AddRange(members);
+    }
+
+    private void MemberMethod(IMethodSymbol methodSymbol)
     {
         if (methodSymbol.MethodKind == MethodKind.PropertyGet)
             return;
@@ -88,7 +101,7 @@ public class TargetClassBuilderHandler : ITypeSymbolVisitor<CompilationUnitSynta
         _members.AddRange(members);
     }
 
-    private void Member(IPropertySymbol propertySymbol)
+    private void MemberProp(IPropertySymbol propertySymbol)
     {
         var members = propertySymbol.Visit(new PropertySetupHandler(
             new PropertySetupStrategy()));

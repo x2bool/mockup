@@ -2,6 +2,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Mockup.Analyzers.Visitors;
+
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Mockup.Analyzers.Handlers;

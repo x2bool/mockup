@@ -4,6 +4,7 @@ using Mockup.Tests.Targets;
 using Xunit;
 
 [assembly: Mock(typeof(AbstractObjectService))]
+[assembly: Mock(typeof(AbstractObjectServiceWithConstructor))]
 
 namespace Mockup.Tests;
 
@@ -144,5 +145,33 @@ public class AbstractServiceMockTests
         
         var result = abstractObjectService.MultipleArgsReturnMethod("Changed", "Value");
         Assert.Equal("ChangedValue", result);
+    }
+
+    [Fact]
+    public void BuildForConstructorWithZeroParamsCallsBaseConstructor()
+    {
+        var abstractObjectService = new AbstractObjectServiceWithConstructorMock()
+            .Build();
+        
+        Assert.Equal("base", abstractObjectService.EmptyValue);
+    }
+
+    [Fact]
+    public void BuildForConstructorWithOneParamCallsBaseConstructor()
+    {
+        var abstractObjectService = new AbstractObjectServiceWithConstructorMock()
+            .Build("Value");
+        
+        Assert.Equal("Value", abstractObjectService.ArgValue);
+    }
+
+    [Fact]
+    public void BuildForConstructorWithTwoParamsCallsBaseConstructor()
+    {
+        var abstractObjectService = new AbstractObjectServiceWithConstructorMock()
+            .Build("Value1", "Value2");
+        
+        Assert.Equal("Value1", abstractObjectService.Arg1Value);
+        Assert.Equal("Value2", abstractObjectService.Arg2Value);
     }
 }

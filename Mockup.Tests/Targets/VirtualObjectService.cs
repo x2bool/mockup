@@ -2,10 +2,10 @@ namespace Mockup.Tests.Targets;
 
 public class VirtualObjectService
 {
-    public object WritePropertyValue;
-    public object ReadWritePropertyValue;
-    public object SingleArgMethodValue;
-    public object MultipleArgsMethodValue;
+    public object? WritePropertyValue;
+    public object? ReadWritePropertyValue;
+    public object? SingleArgMethodValue;
+    public object? MultipleArgsMethodValue;
     
     public virtual object ReadProperty
     {
@@ -59,5 +59,29 @@ public class VirtualObjectService
     public virtual object MultipleArgsReturnMethod(object arg1, object arg2)
     {
         return "base";
+    }
+}
+
+public class VirtualObjectServiceWithConstructor
+{
+    public object? EmptyValue;
+    public object? ArgValue;
+    public object? Arg1Value;
+    public object? Arg2Value;
+    
+    public VirtualObjectServiceWithConstructor()
+    {
+        EmptyValue = "base";
+    }
+
+    public VirtualObjectServiceWithConstructor(object arg)
+    {
+        ArgValue = arg;
+    }
+
+    public VirtualObjectServiceWithConstructor(object arg1, object arg2)
+    {
+        Arg1Value = arg1;
+        Arg2Value = arg2;
     }
 }
