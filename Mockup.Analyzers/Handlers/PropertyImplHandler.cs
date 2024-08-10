@@ -1,15 +1,16 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Mockup.Visitors;
-
+using Mockup.Analyzers.Visitors;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Mockup.Generators;
+namespace Mockup.Analyzers.Handlers;
 
 public class PropertyImplHandler : IPropertySymbolVisitor<MemberDeclarationSyntax[]>
 {
-    private ITypeSymbol _typeSymbol;
+    private ITypeSymbol _ownerType;
+    private bool _isAbstract;
+    private bool _isVirtual;
     private ITypeSymbol _returnType;
     private string _name;
     private bool _read;
@@ -21,7 +22,17 @@ public class PropertyImplHandler : IPropertySymbolVisitor<MemberDeclarationSynta
 
     public void OwnerType(ITypeSymbol typeSymbol)
     {
-        _typeSymbol = typeSymbol;
+        _ownerType = typeSymbol;
+    }
+
+    public void Abstract(bool isAbstract)
+    {
+        _isAbstract = isAbstract;
+    }
+
+    public void Virtual(bool isVirtual)
+    {
+        _isVirtual = isVirtual;
     }
 
     public void ReturnType(ITypeSymbol typeSymbol)
@@ -82,10 +93,7 @@ public class PropertyImplHandler : IPropertySymbolVisitor<MemberDeclarationSynta
         )
         .WithModifiers
         (
-            TokenList
-            (
-                Token(SyntaxKind.PublicKeyword)
-            )
+            Modifiers()
         )
         .WithAccessorList
         (
@@ -127,23 +135,7 @@ public class PropertyImplHandler : IPropertySymbolVisitor<MemberDeclarationSynta
                                             SyntaxKind.NullLiteralExpression
                                         )
                                     ),
-                                    Block
-                                    (
-                                        SingletonList<StatementSyntax>
-                                        (
-                                            ThrowStatement
-                                            (
-                                                ObjectCreationExpression
-                                                    (
-                                                        IdentifierName("NotImplementedException")
-                                                    )
-                                                    .WithArgumentList
-                                                    (
-                                                        ArgumentList()
-                                                    )
-                                            )
-                                        )
-                                    )
+                                    FallbackGetBlock()
                                 ),
                                 ReturnStatement
                                 (
@@ -183,10 +175,7 @@ public class PropertyImplHandler : IPropertySymbolVisitor<MemberDeclarationSynta
         )
         .WithModifiers
         (
-            TokenList
-            (
-                Token(SyntaxKind.PublicKeyword)
-            )
+            Modifiers()
         )
         .WithAccessorList
         (
@@ -228,23 +217,7 @@ public class PropertyImplHandler : IPropertySymbolVisitor<MemberDeclarationSynta
                                         SyntaxKind.NullLiteralExpression
                                     )
                                 ),
-                                Block
-                                (
-                                    SingletonList<StatementSyntax>
-                                    (
-                                        ThrowStatement
-                                        (
-                                            ObjectCreationExpression
-                                            (
-                                                IdentifierName("NotImplementedException")
-                                            )
-                                            .WithArgumentList
-                                            (
-                                                ArgumentList()
-                                            )
-                                        )
-                                    )
-                                )
+                                FallbackSetBlock()
                             ),
                             ExpressionStatement
                             (
@@ -297,10 +270,7 @@ public class PropertyImplHandler : IPropertySymbolVisitor<MemberDeclarationSynta
         )
         .WithModifiers
         (
-            TokenList
-            (
-                Token(SyntaxKind.PublicKeyword)
-            )
+            Modifiers()
         )
         .WithAccessorList
         (
@@ -344,23 +314,7 @@ public class PropertyImplHandler : IPropertySymbolVisitor<MemberDeclarationSynta
                                             SyntaxKind.NullLiteralExpression
                                         )
                                     ),
-                                    Block
-                                    (
-                                        SingletonList<StatementSyntax>
-                                        (
-                                            ThrowStatement
-                                            (
-                                                ObjectCreationExpression
-                                                    (
-                                                        IdentifierName("NotImplementedException")
-                                                    )
-                                                    .WithArgumentList
-                                                    (
-                                                        ArgumentList()
-                                                    )
-                                            )
-                                        )
-                                    )
+                                    FallbackGetBlock()
                                 ),
                                 ReturnStatement
                                 (
@@ -420,23 +374,7 @@ public class PropertyImplHandler : IPropertySymbolVisitor<MemberDeclarationSynta
                                             SyntaxKind.NullLiteralExpression
                                         )
                                     ),
-                                    Block
-                                    (
-                                        SingletonList<StatementSyntax>
-                                        (
-                                            ThrowStatement
-                                            (
-                                                ObjectCreationExpression
-                                                (
-                                                    IdentifierName("NotImplementedException")
-                                                )
-                                                .WithArgumentList
-                                                (
-                                                    ArgumentList()
-                                                )
-                                            )
-                                        )
-                                    )
+                                    FallbackSetBlock()
                                 ),
                                 ExpressionStatement
                                 (
@@ -476,6 +414,95 @@ public class PropertyImplHandler : IPropertySymbolVisitor<MemberDeclarationSynta
                             )
                         )
                     }
+                )
+            )
+        );
+    }
+
+    private SyntaxTokenList Modifiers()
+    {
+        if (_ownerType.TypeKind == TypeKind.Interface)
+        {
+            return TokenList
+            (
+                Token(SyntaxKind.PublicKeyword)
+            );
+        }
+        
+        return TokenList
+        (
+            Token(SyntaxKind.PublicKeyword),
+            Token(SyntaxKind.OverrideKeyword)
+        );
+    }
+    
+    private BlockSyntax FallbackGetBlock()
+    {
+        if (_isVirtual)
+        {
+            return Block
+            (
+                SingletonList<StatementSyntax>
+                (
+                    ReturnStatement
+                    (
+                        MemberAccessExpression
+                        (
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            BaseExpression(),
+                            IdentifierName(_name)
+                        )
+                    )
+                )
+            );
+        }
+
+        return FallbackThrowBlock();
+    }
+
+    private BlockSyntax FallbackSetBlock()
+    {
+        if (_isVirtual)
+        {
+            return Block
+            (
+                ExpressionStatement
+                (
+                    AssignmentExpression
+                    (
+                        SyntaxKind.SimpleAssignmentExpression,
+                        MemberAccessExpression
+                        (
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            BaseExpression(),
+                            IdentifierName(_name)
+                        ),
+                        IdentifierName("value")
+                    )
+                ),
+                ReturnStatement()
+            );
+        }
+        
+        return FallbackThrowBlock();
+    }
+    
+    private BlockSyntax FallbackThrowBlock()
+    {
+        return Block
+        (
+            SingletonList<StatementSyntax>
+            (
+                ThrowStatement
+                (
+                    ObjectCreationExpression
+                        (
+                            IdentifierName("NotImplementedException")
+                        )
+                        .WithArgumentList
+                        (
+                            ArgumentList()
+                        )
                 )
             )
         );

@@ -1,6 +1,6 @@
 using Microsoft.CodeAnalysis;
 
-namespace Mockup.Visitors;
+namespace Mockup.Analyzers.Visitors;
 
 public interface IPropertySymbolVisitor<out T>
 {
@@ -8,6 +8,8 @@ public interface IPropertySymbolVisitor<out T>
 
     void OwnerType(ITypeSymbol typeSymbol);
     
+    void Abstract(bool isAbstract);
+    void Virtual(bool isVirtual);
     void ReturnType(ITypeSymbol typeSymbol);
     void Name(string name);
     
@@ -25,6 +27,8 @@ public static class PropertySymbolVisitorExtensions
 
         visitor.OwnerType(propertySymbol.ContainingType);
         
+        visitor.Abstract(propertySymbol.IsAbstract);
+        visitor.Virtual(propertySymbol.IsVirtual);
         visitor.ReturnType(propertySymbol.Type);
         visitor.Name(propertySymbol.Name);
 

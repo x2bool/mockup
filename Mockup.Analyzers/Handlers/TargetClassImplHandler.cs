@@ -6,16 +6,16 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Mockup.Analyzers.Handlers;
 
-public class TargetInterfaceImplHandler : ITypeSymbolVisitor<MemberDeclarationSyntax[]>
+public class TargetClassImplHandler : ITypeSymbolVisitor<MemberDeclarationSyntax[]>
 {
-    private readonly ITargetInterfaceImplStrategy _strategy;
+    private readonly ITargetClassImplStrategy _strategy;
     
     private INamespaceSymbol _namespaceSymbol;
     private ITypeSymbol _typeSymbol;
     
     private List<MemberDeclarationSyntax>? _members;
 
-    public TargetInterfaceImplHandler(ITargetInterfaceImplStrategy strategy)
+    public TargetClassImplHandler(ITargetClassImplStrategy strategy)
     {
         _strategy = strategy;
     }
@@ -46,13 +46,34 @@ public class TargetInterfaceImplHandler : ITypeSymbolVisitor<MemberDeclarationSy
         switch (symbol)
         {
             case IMethodSymbol methodSymbol:
-                Member(methodSymbol);
+                if (IsOverrideable(methodSymbol))
+                {
+                    Member(methodSymbol);
+                }
                 break;
             
             case IPropertySymbol propertySymbol:
-                Member(propertySymbol);
+                if (propertySymbol.IsAbstract || propertySymbol.IsVirtual)
+                {
+                    Member(propertySymbol);
+                }
                 break;
         }
+    }
+
+    private bool IsOverrideable(IMethodSymbol methodSymbol)
+    {
+        //if (methodSymbol.Name == ".ctor") return false; // TODO: ???
+        //if (methodSymbol.Name == _typeSymbol.Name) return false;
+        
+        if (methodSymbol.MethodKind == MethodKind.Ordinary
+            || methodSymbol.MethodKind == MethodKind.DeclareMethod)
+        {
+            return methodSymbol.MethodKind != MethodKind.Constructor
+                   && methodSymbol.MethodKind != MethodKind.Destructor;
+        }
+
+        return false;
     }
 
     private void Member(IMethodSymbol methodSymbol)
@@ -112,7 +133,7 @@ public class TargetInterfaceImplHandler : ITypeSymbolVisitor<MemberDeclarationSy
             cls
         };
     }
-
+    
     private FieldDeclarationSyntax BackingField()
     {
         return FieldDeclaration
@@ -233,7 +254,7 @@ public class TargetInterfaceImplHandler : ITypeSymbolVisitor<MemberDeclarationSy
             )
         );
     }
-
+    
     private PropertyDeclarationSyntax Accessor()
     {
         return PropertyDeclaration
@@ -293,12 +314,12 @@ public class TargetInterfaceImplHandler : ITypeSymbolVisitor<MemberDeclarationSy
     }
 }
 
-public interface ITargetInterfaceImplStrategy
+public interface ITargetClassImplStrategy
 {
     string GetTypeName(ITypeSymbol typeSymbol);
 }
 
-public class TargetInterfaceImplStrategy : ITargetInterfaceImplStrategy
+public class TargetClassImplStrategy : ITargetClassImplStrategy
 {
     public string GetTypeName(ITypeSymbol typeSymbol)
     {

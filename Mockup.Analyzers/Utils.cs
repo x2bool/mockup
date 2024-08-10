@@ -2,10 +2,9 @@ using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Mockup;
+namespace Mockup.Analyzers;
 
 public static class Utils
 {

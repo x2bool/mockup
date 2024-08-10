@@ -1,6 +1,6 @@
 using Microsoft.CodeAnalysis;
 
-namespace Mockup.Visitors;
+namespace Mockup.Analyzers.Visitors;
 
 public interface ITypeSymbolVisitor<out T>
 {

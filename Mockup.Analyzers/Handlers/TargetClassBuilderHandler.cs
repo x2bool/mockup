@@ -6,20 +6,20 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Mockup.Analyzers.Handlers;
 
-public class TargetInterfaceBuilderHandler : ITypeSymbolVisitor<CompilationUnitSyntax>
+public class TargetClassBuilderHandler : ITypeSymbolVisitor<CompilationUnitSyntax>
 {
-    private readonly ITargetInterfaceBuilderStrategy _strategy;
+    private readonly ITargetClassBuilderStrategy _strategy;
     
     private INamespaceSymbol _namespaceSymbol;
     private ITypeSymbol _typeSymbol;
     
     private List<MemberDeclarationSyntax>? _members;
 
-    public TargetInterfaceBuilderHandler(ITargetInterfaceBuilderStrategy strategy)
+    public TargetClassBuilderHandler(ITargetClassBuilderStrategy strategy)
     {
         _strategy = strategy;
     }
-    
+
     public void Begin()
     {
     }
@@ -44,13 +44,34 @@ public class TargetInterfaceBuilderHandler : ITypeSymbolVisitor<CompilationUnitS
         switch (symbol)
         {
             case IMethodSymbol methodSymbol:
-                Member(methodSymbol);
+                if (IsOverrideable(methodSymbol))
+                {
+                    Member(methodSymbol);
+                }
                 break;
             
             case IPropertySymbol propertySymbol:
-                Member(propertySymbol);
+                if (propertySymbol.IsAbstract || propertySymbol.IsVirtual)
+                {
+                    Member(propertySymbol);
+                }
                 break;
         }
+    }
+
+    private bool IsOverrideable(IMethodSymbol methodSymbol)
+    {
+        // if (methodSymbol.Name == ".ctor") return false; // TODO: ???
+        // if (methodSymbol.Name == _typeSymbol.Name) return false;
+        
+        if (methodSymbol.MethodKind == MethodKind.Ordinary
+            || methodSymbol.MethodKind == MethodKind.DeclareMethod)
+        {
+            return methodSymbol.MethodKind != MethodKind.Constructor
+                   && methodSymbol.MethodKind != MethodKind.Destructor;
+        }
+
+        return false;
     }
 
     private void Member(IMethodSymbol methodSymbol)
@@ -77,8 +98,8 @@ public class TargetInterfaceBuilderHandler : ITypeSymbolVisitor<CompilationUnitS
 
     public void MembersEnd()
     {
-        var members = _typeSymbol.Visit(new TargetInterfaceImplHandler(
-            new TargetInterfaceImplStrategy()));
+        var members = _typeSymbol.Visit(new TargetClassImplHandler(
+            new TargetClassImplStrategy()));
         
         _members.AddRange(members);
     }
@@ -101,38 +122,38 @@ public class TargetInterfaceBuilderHandler : ITypeSymbolVisitor<CompilationUnitS
                 SingletonList<MemberDeclarationSyntax>
                 (
                     NamespaceDeclaration
-                    (
-                        IdentifierName(Utils.GetFullName(_namespaceSymbol))
-                    )
-                    .WithMembers
-                    (
-                        SingletonList<MemberDeclarationSyntax>
                         (
-                            ClassDeclaration(_strategy.GetTypeName(_typeSymbol))
-                                .WithModifiers
-                                (
-                                    TokenList
-                                    (
-                                        Token(SyntaxKind.PublicKeyword)
-                                    )
-                                )
-                                .WithMembers
-                                (
-                                    List(_members)
-                                )
+                            IdentifierName(Utils.GetFullName(_namespaceSymbol))
                         )
-                    )
+                        .WithMembers
+                        (
+                            SingletonList<MemberDeclarationSyntax>
+                            (
+                                ClassDeclaration(_strategy.GetTypeName(_typeSymbol))
+                                    .WithModifiers
+                                    (
+                                        TokenList
+                                        (
+                                            Token(SyntaxKind.PublicKeyword)
+                                        )
+                                    )
+                                    .WithMembers
+                                    (
+                                        List(_members)
+                                    )
+                            )
+                        )
                 )
             );
     }
 }
 
-public interface ITargetInterfaceBuilderStrategy
+public interface ITargetClassBuilderStrategy
 {
     string GetTypeName(ITypeSymbol typeSymbol);
 }
 
-public class TargetInterfaceBuilderStrategy : ITargetInterfaceBuilderStrategy
+public class TargetClassBuilderStrategy : ITargetClassBuilderStrategy
 {
     public string GetTypeName(ITypeSymbol typeSymbol)
     {

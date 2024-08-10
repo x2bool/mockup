@@ -1,7 +1,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Mockup;
+namespace Mockup.Analyzers;
 
 [Generator]
 public class MockSourceGenerator : ISourceGenerator
@@ -79,8 +79,18 @@ public class MockSourceGenerator : ISourceGenerator
 
         foreach (var mockTarget in mockTargets)
         {
-            context.AddSource(
-                $"{mockTarget.GetHintName()}.g.cs", mockTarget.GenerateSource());
+            var (source, diagnostic) = mockTarget.Process();
+
+            if (source != null)
+            {
+                context.AddSource(
+                    source.HintName, source.CompilationUnit.NormalizeWhitespace().ToFullString());
+            }
+
+            if (diagnostic != null)
+            {
+                context.ReportDiagnostic(diagnostic);
+            }
         }
     }
 }

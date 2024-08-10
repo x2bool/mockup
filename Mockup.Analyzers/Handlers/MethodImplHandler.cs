@@ -1,15 +1,16 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Mockup.Visitors;
-
+using Mockup.Analyzers.Visitors;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Mockup.Generators;
+namespace Mockup.Analyzers.Handlers;
 
 public class MethodImplHandler : IMethodSymbolVisitor<MemberDeclarationSyntax[]>
 {
-    private ITypeSymbol _typeSymbol;
+    private ITypeSymbol _ownerType;
+    private bool _isAbstract;
+    private bool _isVirtual;
     private ITypeSymbol _returnType;
     private string _name;
     private List<IParameterSymbol> _parameters;
@@ -20,7 +21,17 @@ public class MethodImplHandler : IMethodSymbolVisitor<MemberDeclarationSyntax[]>
 
     public void OwnerType(ITypeSymbol typeSymbol)
     {
-        _typeSymbol = typeSymbol;
+        _ownerType = typeSymbol;
+    }
+
+    public void Abstract(bool isAbstract)
+    {
+        _isAbstract = isAbstract;
+    }
+
+    public void Virtual(bool isVirtual)
+    {
+        _isVirtual = isVirtual;
     }
 
     public void ReturnType(ITypeSymbol typeSymbol)
@@ -115,10 +126,7 @@ public class MethodImplHandler : IMethodSymbolVisitor<MemberDeclarationSyntax[]>
         )
         .WithModifiers
         (
-            TokenList
-            (
-                Token(SyntaxKind.PublicKeyword)
-            )
+            Modifiers()
         )
         .WithParameterList
         (
@@ -160,23 +168,7 @@ public class MethodImplHandler : IMethodSymbolVisitor<MemberDeclarationSyntax[]>
                             SyntaxKind.NullLiteralExpression
                         )
                     ),
-                    Block
-                    (
-                        SingletonList<StatementSyntax>
-                        (
-                            ThrowStatement
-                            (
-                                ObjectCreationExpression
-                                (
-                                    IdentifierName("NotImplementedException")
-                                )
-                                .WithArgumentList
-                                (
-                                    ArgumentList()
-                                )
-                            )
-                        )
-                    )
+                    FallbackBlock()
                 ),
                 ExpressionStatement
                 (
@@ -223,10 +215,7 @@ public class MethodImplHandler : IMethodSymbolVisitor<MemberDeclarationSyntax[]>
         )
         .WithModifiers
         (
-            TokenList
-            (
-                Token(SyntaxKind.PublicKeyword)
-            )
+            Modifiers()
         )
         .WithParameterList
         (
@@ -268,23 +257,7 @@ public class MethodImplHandler : IMethodSymbolVisitor<MemberDeclarationSyntax[]>
                             SyntaxKind.NullLiteralExpression
                         )
                     ),
-                    Block
-                    (
-                        SingletonList<StatementSyntax>
-                        (
-                            ThrowStatement
-                            (
-                                ObjectCreationExpression
-                                (
-                                    IdentifierName("NotImplementedException")
-                                )
-                                .WithArgumentList
-                                (
-                                    ArgumentList()
-                                )
-                            )
-                        )
-                    )
+                    FallbackBlock()
                 ),
                 ReturnStatement
                 (
@@ -305,6 +278,131 @@ public class MethodImplHandler : IMethodSymbolVisitor<MemberDeclarationSyntax[]>
                                 )
                             ),
                             IdentifierName($"_implOf{_name}")
+                        )
+                    )
+                    .WithArgumentList
+                    (
+                        ArgumentList
+                        (
+                            SeparatedList<ArgumentSyntax>
+                            (
+                                Arguments()
+                            )
+                        )
+                    )
+                )
+            )
+        );
+    }
+
+    private SyntaxTokenList Modifiers()
+    {
+        if (_ownerType.TypeKind == TypeKind.Interface)
+        {
+            return TokenList
+            (
+                Token(SyntaxKind.PublicKeyword)
+            );
+        }
+        
+        return TokenList
+        (
+            Token(SyntaxKind.PublicKeyword),
+            Token(SyntaxKind.OverrideKeyword)
+        );
+    }
+
+    private BlockSyntax FallbackBlock()
+    {
+        if (_isVirtual)
+        {
+            if (_returnType.SpecialType == SpecialType.System_Void)
+            {
+                return FallbackCallBlock();
+            }
+
+            return FallbackReturnCallBlock();
+        }
+        
+        // if (_ownerType.TypeKind == TypeKind.Interface)
+        // {
+        //     return FallbackThrowBlock();
+        // }
+        //
+        // if (_isAbstract)
+        // {
+        //     return FallbackThrowBlock();
+        // }
+
+        return FallbackThrowBlock();
+    }
+
+    private BlockSyntax FallbackThrowBlock()
+    {
+        return Block
+        (
+            SingletonList<StatementSyntax>
+            (
+                ThrowStatement
+                (
+                    ObjectCreationExpression
+                        (
+                            IdentifierName("NotImplementedException")
+                        )
+                        .WithArgumentList
+                        (
+                            ArgumentList()
+                        )
+                )
+            )
+        );
+    }
+
+    private BlockSyntax FallbackCallBlock()
+    {
+        return Block
+        (
+            ExpressionStatement
+            (
+                InvocationExpression
+                (
+                    MemberAccessExpression
+                    (
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        BaseExpression(),
+                        IdentifierName(_name)
+                    )
+                )
+                .WithArgumentList
+                (
+                    ArgumentList
+                    (
+                        SeparatedList<ArgumentSyntax>
+                        (
+                            Arguments()
+                        )
+                    )
+                )
+            ),
+            ReturnStatement()
+        );
+    }
+
+    private BlockSyntax FallbackReturnCallBlock()
+    {
+        return Block
+        (
+            SingletonList<StatementSyntax>
+            (
+                ReturnStatement
+                (
+                    InvocationExpression
+                    (
+                        MemberAccessExpression
+                        (
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            BaseExpression(),
+                            IdentifierName(_name)
                         )
                     )
                     .WithArgumentList

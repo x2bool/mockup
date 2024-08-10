@@ -1,8 +1,9 @@
 using Microsoft.CodeAnalysis;
-using Mockup.Generators;
-using Mockup.Visitors;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Mockup.Analyzers.Handlers;
+using Mockup.Analyzers.Visitors;
 
-namespace Mockup;
+namespace Mockup.Analyzers;
 
 internal class MockTarget
 {
@@ -13,13 +14,36 @@ internal class MockTarget
         TypeSymbol = typeSymbol;
     }
 
-    public string GetTypeName()
+    public (SourceCode?, Diagnostic?) Process()
+    {
+        var visitor = GetVisitor();
+        if (visitor == null)
+        {
+            return (
+                null,
+                Diagnostic.Create(
+                    Diagnostics.InvalidTarget,
+                    TypeSymbol.Locations.FirstOrDefault(),
+                    Utils.GetFullName(TypeSymbol)
+                )
+            );
+        }
+
+        var compilationUnit = TypeSymbol.Visit(visitor);
+        if (compilationUnit != null)
+        {
+            return (new SourceCode($"{GetHintName()}.g.cs", compilationUnit), null);
+        }
+
+        return (null, null);
+    }
+
+    private string GetTypeName()
     {
         var typeName = TypeSymbol.Name;
         if (typeName.Length > 1)
         {
-            var first = typeName[0];
-            if (first == 'I')
+            if (TypeSymbol.TypeKind == TypeKind.Interface && typeName[0] == 'I')
             {
                 var second = typeName[1];
                 if (char.IsUpper(second))
@@ -32,35 +56,25 @@ internal class MockTarget
         return $"{typeName}Mock";
     }
 
-    public string GetNamespace()
+    private string GetNamespace()
     {
         return Utils.GetFullName(TypeSymbol.ContainingNamespace);
     }
 
-    public string GetHintName()
+    private string GetHintName()
     {
         return $"{GetNamespace().Replace('.', '_')}_{GetTypeName()}";
     }
 
-    public string GenerateSource()
+    private ITypeSymbolVisitor<CompilationUnitSyntax>? GetVisitor()
     {
-        var compilationUnit = TypeSymbol.Visit(new TargetInterfaceBuilderHandler(
-            new TargetInterfaceBuilderStrategy()));
-        
-        if (compilationUnit != null)
+        return TypeSymbol.TypeKind switch
         {
-            return compilationUnit.NormalizeWhitespace().ToFullString();
-        }
-
-        return "";
-
-//         return $@"
-// using System;
-//
-// namespace {GetNamespace()} {{
-//     public class {GetTypeName()} {{
-//     }}
-// }}
-// ";
+            TypeKind.Interface => new TargetInterfaceBuilderHandler(new TargetInterfaceBuilderStrategy()),
+            TypeKind.Class => TypeSymbol.IsSealed || TypeSymbol.IsStatic
+                ? null
+                : new TargetClassBuilderHandler(new TargetClassBuilderStrategy()),
+            _ => null,
+        };
     }
 }

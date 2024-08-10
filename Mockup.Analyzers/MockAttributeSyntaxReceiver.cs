@@ -2,7 +2,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Mockup;
+namespace Mockup.Analyzers;
 
 public class MockAttributeSyntaxReceiver : ISyntaxReceiver
 {

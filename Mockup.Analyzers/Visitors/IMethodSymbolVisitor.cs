@@ -1,13 +1,15 @@
 using Microsoft.CodeAnalysis;
 
-namespace Mockup.Visitors;
+namespace Mockup.Analyzers.Visitors;
 
 public interface IMethodSymbolVisitor<out T>
 {
     void Begin();
     
     void OwnerType(ITypeSymbol typeSymbol);
-    
+
+    void Abstract(bool isAbstract);
+    void Virtual(bool isVirtual);
     void ReturnType(ITypeSymbol typeSymbol);
     void Name(string name);
 
@@ -26,6 +28,8 @@ public static class MethodSymbolVisitor
 
         visitor.OwnerType(methodSymbol.ContainingType);
         
+        visitor.Abstract(methodSymbol.IsAbstract);
+        visitor.Virtual(methodSymbol.IsVirtual);
         visitor.ReturnType(methodSymbol.ReturnType);
         visitor.Name(methodSymbol.Name);
         

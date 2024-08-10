@@ -1,17 +1,18 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Mockup.Visitors;
-
+using Mockup.Analyzers.Visitors;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Mockup.Generators;
+namespace Mockup.Analyzers.Handlers;
 
 public class MethodSetupHandler : IMethodSymbolVisitor<MemberDeclarationSyntax[]>
 {
     private readonly IMethodSetupStrategy _strategy;
     
     private ITypeSymbol _ownerTypeSymbol;
+    private bool _isAbstract;
+    private bool _isVirtual;
     private ITypeSymbol _returnTypeSymbol;
     private string _name;
     private List<IParameterSymbol> _parameters;
@@ -28,6 +29,16 @@ public class MethodSetupHandler : IMethodSymbolVisitor<MemberDeclarationSyntax[]
     public void OwnerType(ITypeSymbol typeSymbol)
     {
         _ownerTypeSymbol = typeSymbol;
+    }
+
+    public void Abstract(bool isAbstract)
+    {
+        _isAbstract = isAbstract;
+    }
+
+    public void Virtual(bool isVirtual)
+    {
+        _isVirtual = isVirtual;
     }
 
     public void ReturnType(ITypeSymbol typeSymbol)
@@ -236,8 +247,7 @@ public class MethodSetupStrategy : IMethodSetupStrategy
         
         if (typeName.Length > 1)
         {
-            var first = typeName[0];
-            if (first == 'I')
+            if (typeSymbol.TypeKind == TypeKind.Interface && typeName[0] == 'I')
             {
                 var second = typeName[1];
                 if (char.IsUpper(second))
