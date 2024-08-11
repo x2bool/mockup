@@ -44,16 +44,16 @@ public class TargetInterfaceBuilderHandler : ITypeSymbolVisitor<CompilationUnitS
         switch (symbol)
         {
             case IMethodSymbol methodSymbol:
-                Member(methodSymbol);
+                MemberMethod(methodSymbol);
                 break;
             
             case IPropertySymbol propertySymbol:
-                Member(propertySymbol);
+                MemberProp(propertySymbol);
                 break;
         }
     }
 
-    private void Member(IMethodSymbol methodSymbol)
+    private void MemberMethod(IMethodSymbol methodSymbol)
     {
         if (methodSymbol.MethodKind == MethodKind.PropertyGet)
             return;
@@ -67,7 +67,7 @@ public class TargetInterfaceBuilderHandler : ITypeSymbolVisitor<CompilationUnitS
         _members.AddRange(members);
     }
 
-    private void Member(IPropertySymbol propertySymbol)
+    private void MemberProp(IPropertySymbol propertySymbol)
     {
         var members = propertySymbol.Visit(new PropertySetupHandler(
             new PropertySetupStrategy()));
@@ -77,7 +77,11 @@ public class TargetInterfaceBuilderHandler : ITypeSymbolVisitor<CompilationUnitS
 
     public void MembersEnd()
     {
-        var members = _typeSymbol.Visit(new TargetInterfaceImplHandler(
+        var members = _typeSymbol.Visit(new ConstructorBuilderHandler(
+            new ConstructorBuilderStrategy()));
+        _members.AddRange(members);
+        
+        members = _typeSymbol.Visit(new TargetInterfaceImplHandler(
             new TargetInterfaceImplStrategy()));
         
         _members.AddRange(members);

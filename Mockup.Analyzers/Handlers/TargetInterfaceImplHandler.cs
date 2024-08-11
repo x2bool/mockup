@@ -38,7 +38,10 @@ public class TargetInterfaceImplHandler : ITypeSymbolVisitor<MemberDeclarationSy
     {
         _members = new List<MemberDeclarationSyntax>(count);
         _members.Add(BackingField());
-        _members.Add(Constructor());
+        
+        var members = _typeSymbol.Visit(new ConstructorImplHandler(
+            new ConstructorImplStrategy()));
+        _members.AddRange(members);
     }
 
     public void Member(ISymbol symbol)
@@ -46,16 +49,16 @@ public class TargetInterfaceImplHandler : ITypeSymbolVisitor<MemberDeclarationSy
         switch (symbol)
         {
             case IMethodSymbol methodSymbol:
-                Member(methodSymbol);
+                MemberMethod(methodSymbol);
                 break;
             
             case IPropertySymbol propertySymbol:
-                Member(propertySymbol);
+                MemberProp(propertySymbol);
                 break;
         }
     }
 
-    private void Member(IMethodSymbol methodSymbol)
+    private void MemberMethod(IMethodSymbol methodSymbol)
     {
         if (methodSymbol.MethodKind == MethodKind.PropertyGet)
             return;
@@ -67,7 +70,7 @@ public class TargetInterfaceImplHandler : ITypeSymbolVisitor<MemberDeclarationSy
         _members.AddRange(members);
     }
 
-    private void Member(IPropertySymbol propertySymbol)
+    private void MemberProp(IPropertySymbol propertySymbol)
     {
         var members = propertySymbol.Visit(new PropertyImplHandler());
         _members.AddRange(members);
@@ -79,7 +82,6 @@ public class TargetInterfaceImplHandler : ITypeSymbolVisitor<MemberDeclarationSy
 
     public MemberDeclarationSyntax[]? End()
     {
-        var builderMethod = BuilderMethod();
         var cls = ClassDeclaration("@class")
             .WithModifiers
             (
@@ -108,8 +110,7 @@ public class TargetInterfaceImplHandler : ITypeSymbolVisitor<MemberDeclarationSy
 
         return new MemberDeclarationSyntax[]
         {
-            builderMethod,
-            cls
+            cls,
         };
     }
 
@@ -148,133 +149,6 @@ public class TargetInterfaceImplHandler : ITypeSymbolVisitor<MemberDeclarationSy
                     Token(SyntaxKind.PrivateKeyword),
                     Token(SyntaxKind.ReadOnlyKeyword)
                 }
-            )
-        );
-    }
-
-    private ConstructorDeclarationSyntax Constructor()
-    {
-        return ConstructorDeclaration
-        (
-            Identifier("@class")
-        )
-        .WithModifiers
-        (
-            TokenList
-            (
-                Token(SyntaxKind.PublicKeyword)
-            )
-        )
-        .WithParameterList
-        (
-            ParameterList
-            (
-                SingletonSeparatedList<ParameterSyntax>
-                (
-                    Parameter
-                        (
-                            Identifier
-                            (
-                                TriviaList(),
-                                SyntaxKind.VarKeyword,
-                                "@var",
-                                "var",
-                                TriviaList()
-                            )
-                        )
-                        .WithType
-                        (
-                            IdentifierName(_strategy.GetTypeName(_typeSymbol))
-                        )
-                )
-            )
-        )
-        .WithBody
-        (
-            Block
-            (
-                SingletonList<StatementSyntax>
-                (
-                    ExpressionStatement
-                    (
-                        AssignmentExpression
-                        (
-                            SyntaxKind.SimpleAssignmentExpression,
-                            MemberAccessExpression
-                            (
-                                SyntaxKind.SimpleMemberAccessExpression,
-                                ThisExpression(),
-                                IdentifierName
-                                (
-                                    Identifier
-                                    (
-                                        TriviaList(),
-                                        SyntaxKind.VarKeyword,
-                                        "@var",
-                                        "var",
-                                        TriviaList()
-                                    )
-                                )
-                            ),
-                            IdentifierName
-                            (
-                                Identifier
-                                (
-                                    TriviaList(),
-                                    SyntaxKind.VarKeyword,
-                                    "@var",
-                                    "var",
-                                    TriviaList()
-                                )
-                            )
-                        )
-                    )
-                )
-            )
-        );
-    }
-    
-    private MethodDeclarationSyntax BuilderMethod()
-    {
-        return MethodDeclaration
-        (
-            IdentifierName(_typeSymbol.Name),
-            Identifier("Build") // TODO: make configurable
-        )
-        .WithModifiers
-        (
-            TokenList
-            (
-                Token(SyntaxKind.PublicKeyword)
-            )
-        )
-        .WithBody
-        (
-            Block
-            (
-                SingletonList<StatementSyntax>
-                (
-                    ReturnStatement
-                    (
-                        ObjectCreationExpression
-                        (
-                            IdentifierName("@class")
-                        )
-                        .WithArgumentList
-                        (
-                            ArgumentList
-                            (
-                                SingletonSeparatedList<ArgumentSyntax>
-                                (
-                                    Argument
-                                    (
-                                        ThisExpression()
-                                    )
-                                )
-                            )
-                        )
-                    )
-                )
             )
         );
     }
