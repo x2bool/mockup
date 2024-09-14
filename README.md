@@ -100,7 +100,6 @@ Return string passed as an argument:
 
 This is an early stage, experimental project. The following is not done:
 
-* Mocking abstract classes
 * Mocking generic types
 * Custom names for mocks
 * Arbitrary namespace for mocks
