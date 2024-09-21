@@ -15,6 +15,7 @@ public class MethodImplHandler : IMethodSymbolVisitor<MemberDeclarationSyntax[]>
     private ITypeSymbol _returnType;
     private string _name;
     private List<IParameterSymbol> _parameters;
+    private Accessibility _access;
 
     public void Begin()
     {
@@ -23,6 +24,11 @@ public class MethodImplHandler : IMethodSymbolVisitor<MemberDeclarationSyntax[]>
     public void OwnerType(ITypeSymbol typeSymbol)
     {
         _ownerType = typeSymbol;
+    }
+
+    public void Access(Accessibility access)
+    {
+        _access = access;
     }
 
     public void Abstract(bool isAbstract)
@@ -117,19 +123,31 @@ public class MethodImplHandler : IMethodSymbolVisitor<MemberDeclarationSyntax[]>
 
     private MethodDeclarationSyntax InvokeMethod()
     {
-        return MethodDeclaration
+        var method = MethodDeclaration
         (
             PredefinedType
             (
                 Token(SyntaxKind.VoidKeyword)
             ),
             Identifier(_name)
-        )
-        .WithModifiers
-        (
-            Modifiers()
-        )
-        .WithParameterList
+        );
+
+        if (_ownerType.TypeKind == TypeKind.Interface)
+        {
+            method = method.WithExplicitInterfaceSpecifier
+            (
+                ExplicitInterfaceSpecifier
+                (
+                    IdentifierName(_ownerType.Name)
+                )
+            );
+        }
+        else
+        {
+            method = method.WithModifiers(Modifiers());
+        }
+            
+        method = method.WithParameterList
         (
             ParameterList
             (
@@ -205,20 +223,34 @@ public class MethodImplHandler : IMethodSymbolVisitor<MemberDeclarationSyntax[]>
                 )
             )
         );
+
+        return method;
     }
 
     private MethodDeclarationSyntax ReturnInvokeMethod()
     {
-        return MethodDeclaration
+        var method = MethodDeclaration
         (
             Utils.GetTypeSyntax(_returnType),
             Identifier(_name)
-        )
-        .WithModifiers
-        (
-            Modifiers()
-        )
-        .WithParameterList
+        );
+
+        if (_ownerType.TypeKind == TypeKind.Interface)
+        {
+            method = method.WithExplicitInterfaceSpecifier
+            (
+                ExplicitInterfaceSpecifier
+                (
+                    IdentifierName(_ownerType.Name)
+                )
+            );
+        }
+        else
+        {
+            method = method.WithModifiers(Modifiers());
+        }
+
+        method = method.WithParameterList
         (
             ParameterList
             (
@@ -294,23 +326,29 @@ public class MethodImplHandler : IMethodSymbolVisitor<MemberDeclarationSyntax[]>
                 )
             )
         );
+
+        return method;
     }
 
     private SyntaxTokenList Modifiers()
     {
-        if (_ownerType.TypeKind == TypeKind.Interface)
+        return _access switch // never private
         {
-            return TokenList
-            (
-                Token(SyntaxKind.PublicKeyword)
-            );
-        }
-        
-        return TokenList
-        (
-            Token(SyntaxKind.PublicKeyword),
-            Token(SyntaxKind.OverrideKeyword)
-        );
+            Accessibility.Public => TokenList(
+                Token(SyntaxKind.PublicKeyword),
+                Token(SyntaxKind.OverrideKeyword)),
+            Accessibility.Protected => TokenList(
+                Token(SyntaxKind.ProtectedKeyword),
+                Token(SyntaxKind.OverrideKeyword)),
+            Accessibility.Internal => TokenList(
+                Token(SyntaxKind.InternalKeyword),
+                Token(SyntaxKind.OverrideKeyword)),
+            Accessibility.ProtectedOrInternal => TokenList(
+                Token(SyntaxKind.ProtectedKeyword),
+                Token(SyntaxKind.InternalKeyword),
+                Token(SyntaxKind.OverrideKeyword)),
+            _ => throw new ArgumentException("Unsupported method accessibility")
+        };
     }
 
     private BlockSyntax FallbackBlock()

@@ -15,6 +15,7 @@ public class PropertyImplHandler : IPropertySymbolVisitor<MemberDeclarationSynta
     private string _name;
     private bool _read;
     private bool _write;
+    private Accessibility _access;
 
     public void Begin()
     {
@@ -23,6 +24,11 @@ public class PropertyImplHandler : IPropertySymbolVisitor<MemberDeclarationSynta
     public void OwnerType(ITypeSymbol typeSymbol)
     {
         _ownerType = typeSymbol;
+    }
+
+    public void Access(Accessibility access)
+    {
+        _access = access;
     }
 
     public void Abstract(bool isAbstract)
@@ -86,16 +92,28 @@ public class PropertyImplHandler : IPropertySymbolVisitor<MemberDeclarationSynta
 
     private PropertyDeclarationSyntax Getter()
     {
-        return PropertyDeclaration
+        var prop = PropertyDeclaration
         (
             Utils.GetTypeSyntax(_returnType),
             Identifier(_name)
-        )
-        .WithModifiers
-        (
-            Modifiers()
-        )
-        .WithAccessorList
+        );
+
+        if (_ownerType.TypeKind == TypeKind.Interface)
+        {
+            prop = prop.WithExplicitInterfaceSpecifier
+            (
+                ExplicitInterfaceSpecifier
+                (
+                    IdentifierName(_ownerType.Name)
+                )
+            );
+        }
+        else
+        {
+            prop = prop.WithModifiers(Modifiers());
+        }
+        
+        prop = prop.WithAccessorList
         (
             AccessorList
             (
@@ -164,20 +182,34 @@ public class PropertyImplHandler : IPropertySymbolVisitor<MemberDeclarationSynta
                 )
             )
         );
+
+        return prop;
     }
     
     private PropertyDeclarationSyntax Setter()
     {
-        return PropertyDeclaration
+        var prop = PropertyDeclaration
         (
             Utils.GetTypeSyntax(_returnType),
             Identifier(_name)
-        )
-        .WithModifiers
-        (
-            Modifiers()
-        )
-        .WithAccessorList
+        );
+
+        if (_ownerType.TypeKind == TypeKind.Interface)
+        {
+            prop = prop.WithExplicitInterfaceSpecifier
+            (
+                ExplicitInterfaceSpecifier
+                (
+                    IdentifierName(_ownerType.Name)
+                )
+            );
+        }
+        else
+        {
+            prop = prop.WithModifiers(Modifiers());
+        }
+            
+        prop = prop.WithAccessorList
         (
             AccessorList
             (
@@ -259,20 +291,34 @@ public class PropertyImplHandler : IPropertySymbolVisitor<MemberDeclarationSynta
                 )
             )
         );
+
+        return prop;
     }
     
     private PropertyDeclarationSyntax GetterAndSetter()
     {
-        return PropertyDeclaration
+        var prop = PropertyDeclaration
         (
             Utils.GetTypeSyntax(_returnType),
             Identifier(_name)
-        )
-        .WithModifiers
-        (
-            Modifiers()
-        )
-        .WithAccessorList
+        );
+
+        if (_ownerType.TypeKind == TypeKind.Interface)
+        {
+            prop = prop.WithExplicitInterfaceSpecifier
+            (
+                ExplicitInterfaceSpecifier
+                (
+                    IdentifierName(_ownerType.Name)
+                )
+            );
+        }
+        else
+        {
+            prop = prop.WithModifiers(Modifiers());
+        }
+            
+        prop = prop.WithAccessorList
         (
             AccessorList
             (
@@ -417,23 +463,29 @@ public class PropertyImplHandler : IPropertySymbolVisitor<MemberDeclarationSynta
                 )
             )
         );
+
+        return prop;
     }
 
     private SyntaxTokenList Modifiers()
     {
-        if (_ownerType.TypeKind == TypeKind.Interface)
+        return _access switch // never private
         {
-            return TokenList
-            (
-                Token(SyntaxKind.PublicKeyword)
-            );
-        }
-        
-        return TokenList
-        (
-            Token(SyntaxKind.PublicKeyword),
-            Token(SyntaxKind.OverrideKeyword)
-        );
+            Accessibility.Public => TokenList(
+                Token(SyntaxKind.PublicKeyword),
+                Token(SyntaxKind.OverrideKeyword)),
+            Accessibility.Protected => TokenList(
+                Token(SyntaxKind.ProtectedKeyword),
+                Token(SyntaxKind.OverrideKeyword)),
+            Accessibility.Internal => TokenList(
+                Token(SyntaxKind.InternalKeyword),
+                Token(SyntaxKind.OverrideKeyword)),
+            Accessibility.ProtectedOrInternal => TokenList(
+                Token(SyntaxKind.ProtectedKeyword),
+                Token(SyntaxKind.InternalKeyword),
+                Token(SyntaxKind.OverrideKeyword)),
+            _ => throw new ArgumentException("Unsupported method accessibility")
+        };
     }
     
     private BlockSyntax FallbackGetBlock()

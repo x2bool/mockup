@@ -87,13 +87,13 @@ public class ObjectServiceMockTests
     {
         object value = "Value";
 
-        var stringSevice = new ObjectServiceMock()
+        var objectService = new ObjectServiceMock()
             .SingleArgMethod(v => value = v)
             .Build();
         
         var changedValue = "ChangedValue";
         
-        stringSevice.SingleArgMethod(changedValue);
+        objectService.SingleArgMethod(changedValue);
         Assert.Equal(changedValue, value);
     }
 
@@ -102,11 +102,11 @@ public class ObjectServiceMockTests
     {
         object value = "Value";
 
-        var stringSevice = new ObjectServiceMock()
+        var objectService = new ObjectServiceMock()
             .MultipleArgsMethod((a, b) => value = (string)a + (string)b)
             .Build();
 
-        stringSevice.MultipleArgsMethod("Changed", "Value");
+        objectService.MultipleArgsMethod("Changed", "Value");
         Assert.Equal("ChangedValue", value);
     }
 

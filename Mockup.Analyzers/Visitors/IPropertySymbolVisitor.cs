@@ -8,6 +8,7 @@ public interface IPropertySymbolVisitor<out T>
 
     void OwnerType(ITypeSymbol typeSymbol);
     
+    void Access(Accessibility access);
     void Abstract(bool isAbstract);
     void Virtual(bool isVirtual);
     void ReturnType(ITypeSymbol typeSymbol);
@@ -26,7 +27,8 @@ public static class PropertySymbolVisitorExtensions
         visitor.Begin();
 
         visitor.OwnerType(propertySymbol.ContainingType);
-        
+
+        visitor.Access(propertySymbol.DeclaredAccessibility);
         visitor.Abstract(propertySymbol.IsAbstract);
         visitor.Virtual(propertySymbol.IsVirtual);
         visitor.ReturnType(propertySymbol.Type);

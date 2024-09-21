@@ -31,6 +31,10 @@ public class MethodSetupHandler : IMethodSymbolVisitor<MemberDeclarationSyntax[]
         _ownerTypeSymbol = typeSymbol;
     }
 
+    public void Access(Accessibility access)
+    {
+    }
+
     public void Abstract(bool isAbstract)
     {
         _isAbstract = isAbstract;

@@ -74,7 +74,8 @@ public class TargetClassBuilderHandler : ITypeSymbolVisitor<CompilationUnitSynta
             || methodSymbol.MethodKind == MethodKind.DeclareMethod)
         {
             return methodSymbol.MethodKind != MethodKind.Constructor
-                   && methodSymbol.MethodKind != MethodKind.Destructor;
+                   && methodSymbol.MethodKind != MethodKind.Destructor
+                   && (methodSymbol.IsAbstract || methodSymbol.IsVirtual);
         }
 
         return false;

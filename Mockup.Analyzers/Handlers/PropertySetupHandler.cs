@@ -33,6 +33,10 @@ public class PropertySetupHandler : IPropertySymbolVisitor<MemberDeclarationSynt
         _ownerTypeSymbol = typeSymbol;
     }
 
+    public void Access(Accessibility access)
+    {
+    }
+
     public void Abstract(bool isAbstract)
     {
         _isAbstract = isAbstract;

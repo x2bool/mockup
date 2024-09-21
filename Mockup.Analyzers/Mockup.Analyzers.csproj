@@ -6,8 +6,8 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
-        <AssemblyVersion>0.6.1</AssemblyVersion>
-        <Version>0.6.1</Version>
+        <AssemblyVersion>0.7.0</AssemblyVersion>
+        <Version>0.7.0</Version>
 
         <Copyright>Sergey Khabibullin</Copyright>
         <Authors>Sergey Khabibullin</Authors>

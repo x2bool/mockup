@@ -8,6 +8,7 @@ public interface IMethodSymbolVisitor<out T>
     
     void OwnerType(ITypeSymbol typeSymbol);
 
+    void Access(Accessibility access);
     void Abstract(bool isAbstract);
     void Virtual(bool isVirtual);
     void ReturnType(ITypeSymbol typeSymbol);
@@ -28,6 +29,7 @@ public static class MethodSymbolVisitor
 
         visitor.OwnerType(methodSymbol.ContainingType);
         
+        visitor.Access(methodSymbol.DeclaredAccessibility);
         visitor.Abstract(methodSymbol.IsAbstract);
         visitor.Virtual(methodSymbol.IsVirtual);
         visitor.ReturnType(methodSymbol.ReturnType);

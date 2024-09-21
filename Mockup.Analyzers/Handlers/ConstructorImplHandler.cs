@@ -29,6 +29,10 @@ public class ConstructorImplHandler : IMethodSymbolVisitor<MemberDeclarationSynt
         _ownerTypeSymbol = typeSymbol;
     }
 
+    public void Access(Accessibility access)
+    {
+    }
+
     public void Abstract(bool isAbstract)
     {
     }
